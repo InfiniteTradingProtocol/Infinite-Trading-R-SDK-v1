@@ -23,6 +23,7 @@
 # This code will run forever on an infinite loop.
 #--------------------------------------------------------------------------------
 
+#This strategy is live here: https://dhedge.org/vault/0xb3daeb9b47bab1e56f29a77eb7a9c7f0ff63221d
 #Loading dependencies  
 
 require(httr)
