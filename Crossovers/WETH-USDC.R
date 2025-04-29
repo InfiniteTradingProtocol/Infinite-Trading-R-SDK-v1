@@ -97,6 +97,7 @@ get_candles <- function(pair, numcandles, timeframe) {
     }
     candles <- fromJSON(content(response, "text"), flatten = TRUE)
     colnames(candles) = c("time","open","high","low","close","volume")
+    candles = rev(candles)
     # Return only the last `numcandles` if available
     if (length(candles) > numcandles) {
       return(candles[1:numcandles, ])
