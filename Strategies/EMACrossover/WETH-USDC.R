@@ -1,36 +1,43 @@
 #--------------------------------------------------------------------------------
-# READ THIS IF YOU ARE USING THIS FOR THE FIRST TIME
 #
-#If this is the first time and you don't have those R packages already installed
-#Use install.packages(c("httr","jsonlite","lubridate","TTR","quantmod")) 
+# INFINITE TRADING PROTOCOL - Trading Strategy Example with Trading Bot
+#
+#--------------------------------------------------------------------------------
+# READ THIS IF YOU ARE USING THIS FOR THE FIRST TIME
+#--------------------------------------------------------------------------------
+#
+# If this is the first time and you don't have those R packages already installed
+# Use install.packages(c("httr","jsonlite","lubridate","TTR","quantmod")) 
 #
 # 1. Create your dHEDGE vault on dHEDGE.org
 #
-# 2. Create your gas wallet and api key on our API Site: http://api.infinitetrading.io
+# 2. Connect your manager wallet and create your gas wallet our managers site: https://www.infinitetrading.io/managers
 #
 # 3. Send gas $1 of ETH (Optimism/Arbitrum/Base) or POL (Polygon)) to your gas wallet
 #
-# 4. Set on your dHEDGE vault the gas wallet address as a 'trader'
-#    Go to your vaults on dHEDGE.org click the vault and 'manage' then 'set trader'.
+# 4. Wait until the vault appears on https://www.infinitetrading.io/managers?section=vaults (refresh after ~ 1min) 
 #
-# 5. Link your gas wallet to your pool using your apiKeys on the API Site.
-#    using the linkGasWallet endpoint.
+# 5. Link the vault to the API using the generated gas wallet on the 'Managed Vaults' section (Is Linked? Column)
 #
-# 6. Use the 'approve' endpoint on the API site and approve both the token to trade and USDC on 'uniswapV3'.
-#    For example if your pair is WETH-USDC you have to approve WETH and USDC on two separate calls.
+# 6. Click on 'Create New Bot' on the 'Trading Bots' Section: https://www.infinitetrading.io/managers?section=vaults
 #
-# You are set, now you only need to run this code from your server/computer.
-# This code will run forever on an infinite loop.
+# 7. Select your gas wallet, the newly linked vault, and WETH-USDC (recommended: Odos platform)
+# 
+# You are set, now you only need to run this code from the clour or your personal server/computer.
+#
+# This code will run forever on an infinite loop. You can remove the while(1) {} loop and use a cron scheduler if desired.
+#
 #--------------------------------------------------------------------------------
 
 #This strategy is live here: https://dhedge.org/vault/0xb3daeb9b47bab1e56f29a77eb7a9c7f0ff63221d
 #Loading dependencies  
 
-require(httr)
-require(jsonlite)
-require(lubridate)
-require(TTR)
-require(quantmod)
+#Load the coinbase and ITP API adapters on the main folder
+source("~/coinbase.R")
+source("~/api.R")
+
+#Load the required packages (use install.packages() to install each of those if its the first time)
+require(jsonlite); require(lubridate); require(TTR); require(quantmod)
 
 #Setup and credentials
 
@@ -41,7 +48,7 @@ apiKey ="YourAPIKeyHere"    #Your Infinite Trading API Key.
 pair = "WETH-USDC"       #The pair to trade.
 slippage = 1            #The max allowed slippage for each trade.
 share = 100             #The percentage of the whole available balance to buy/sell on each trade.
-platform = "uniswapV3"  #The platform to use to execute the swaps.
+platform = "odos"  #The platform to use to execute the swaps.
 max_usd = 10000         #This will overrides the 'share' when the share is bigger than this amount. This is the highest amount of USD per trade allowed to buy/sell.
 threshold = 1           #This is the max amount allowed on the other side of the trade. Example if the trade side is BUY and there is more than 1% of the vault in USDC (from new deposits) it will rebalance the pool.
 
@@ -50,95 +57,12 @@ threshold = 1           #This is the max amount allowed on the other side of the
 n_fast=11   #Fast moving average (EMA)
 n_slow =33 #Slow moving average (EMA)
 
-
-#API Adapter
-
-library(httr)
-
-itp_api <- function(endpoint, params) {
-  url <- paste0("https://api.infinitetrading.io/", endpoint)
-  
-  # For setBot: send query params, no body
-  if (endpoint == "setBot") {
-    response <- POST(url, query = params, body = "", encode = "raw")
-  } else {
-    response <- GET(url, query = params)
-  }
-  
-  content_text <- content(response, "text", encoding = "UTF-8")
-  cat("Response from API:", content_text, "\n")
-}
-
-
-# Mapping timeframes to their equivalent durations in seconds
-timeframe_to_seconds <- list(
-  '1m' = 60,
-  '5m' = 300,
-  '15m' = 900,
-  '1h' = 3600,
-  '6h' = 21600,
-  '1d' = 86400,
-  '1w' = 604800
-)
-
-get_candles <- function(pair, numcandles, timeframe) {
-  product_id <- gsub("_", "-", pair)
-  granularity <- timeframe_to_seconds[[timeframe]]
-  if (is.null(granularity)) {
-    cat(sprintf("Error: Granularity for timeframe '%s' is not defined.\n", timeframe))
-    return(NULL)
-  }
-  url <- sprintf("https://api.exchange.coinbase.com/products/%s/candles", product_id)
-  params <- list(granularity = granularity)
-  tryCatch({
-    response <- GET(url, query = params)
-    if (status_code(response) >= 400) {
-      stop(sprintf("HTTP error occurred: %d - %s", status_code(response), content(response, "text")))
-    }
-    candles <- fromJSON(content(response, "text"), flatten = TRUE)
-    colnames(candles) = c("time","open","high","low","close","volume")
-    candles = rev(candles)
-    # Return only the last `numcandles` if available
-    if (length(candles) > numcandles) {
-      return(candles[1:numcandles, ])
-    } else {
-      return(candles)
-    }
-  }, error = function(e) {
-    cat(sprintf("Error fetching candles: %s\n", e$message))
-    return(NULL)
-  })
-}
-
-get_candles_with_retry <- function(pair, numcandles, timeframe, retries = 3, delay = 1) {
-  attempt <- 0
-  while (attempt < retries) {
-    tryCatch({
-      candles <- get_candles(pair, numcandles, timeframe)
-      if (!is.null(candles)) {
-        return(candles)
-      }
-    }, error = function(e) {
-      cat(sprintf("Error fetching candles: %s\n", e$message))
-      if (grepl("ban", tolower(e$message)) || grepl("403", e$message) || grepl("rate limit", tolower(e$message))) {
-        cat("It looks like your IP might be banned or rate-limited.\n")
-        break
-      }
-    })
-    attempt <- attempt + 1
-    cat(sprintf("Retrying... (%d/%d)\n", attempt, retries))
-    Sys.sleep(delay)
-  }
-  return(NULL)
-}
-
-
 # STRATEGY IMPLEMENTATION
 
 last_side = "hold"
 while (1) {
   tryCatch({
-  candles <- get_candles_with_retry(pair = "POL-USD", numcandles = 300, timeframe = "6h")
+  candles <- get_candles_with_retry(pair = "ETH-USD", numcandles = 300, timeframe = "6h")
   print(candles)
   EMA_FAST = EMA(Cl(candles),n=n_fast); EMA_SLOW = EMA(Cl(candles),n=n_slow)
 
