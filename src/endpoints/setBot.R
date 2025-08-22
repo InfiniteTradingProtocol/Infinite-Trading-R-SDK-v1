@@ -24,7 +24,7 @@
 #' @return A list with error status and message if failed.
 #'
 #' @examples
-#' response <- trade(pair = "WBTC-USDC", side = "long")
+#' response <- setBot(pair = "WBTC-USDC", side = "long")
 #' print(response)
 #'
 #' @export
