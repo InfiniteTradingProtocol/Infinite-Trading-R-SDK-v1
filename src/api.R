@@ -15,3 +15,5 @@ itp_api <- function(endpoint, params) {
   content_text <- content(response, "text", encoding = "UTF-8")
   cat("Response from API:", content_text, "\n")
 }
+
+source(paste0(wd,"src/endpoints/setBot.R"))
