@@ -19,9 +19,14 @@ require(dotenv); require(httr)
 source(paste0(wd,"src/coinbase.R"))
 source(paste0(wd,"src/api.R"))
 
+source(paste0(wd,"src/correlations.R"))
+
 
 #Example
 
-#Fetch ETH-USD 1H Candles from Coinbase and store it into a dataframe.
+#Fetch 1H Candles from Coinbase and store it
 
 eth_1h_candles = get_candles_with_retry(pair="ETH-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
+btc_1h_candles = get_candles_with_retry(pair="BTC-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
+link_1h_candles = get_candles_with_retry(pair="LINK-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
+sol_1h_candles = get_candles_with_retry(pair="SOL-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
