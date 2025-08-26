@@ -20,3 +20,8 @@ source(paste0(wd,"src/coinbase.R"))
 source(paste0(wd,"src/api.R"))
 
 
+#Example
+
+#Fetch ETH-USD 1H Candles from Coinbase and store it into a dataframe.
+
+eth_1h_candles = get_candles_with_retry(pair="ETH-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
