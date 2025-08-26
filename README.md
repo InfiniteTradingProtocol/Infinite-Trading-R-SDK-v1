@@ -1,7 +1,3 @@
-Here’s a polished version of your README.md with better structure, clarity, and developer-friendly formatting:
-
----
-
 # Infinite Trading R SDK
 
 This SDK provides tools to simplify interaction with the **Infinite Trading API** and to streamline the development of trading strategies using **R**.
