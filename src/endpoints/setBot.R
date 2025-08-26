@@ -30,31 +30,13 @@
 #' @export
 library(httr)
 
-setBot <- function(
-  api_key = "ADD YOUR API KEY HERE",
-  protocol = "dhedge",
-  pool = "ADD YOUR POOL ADDRESS HERE",
-  network = "polygon",
-  pair,
-  side,
-  threshold = 1,
-  max_usd = 500,
-  slippage = 1,
-  share = 100,
-  platform = "uniswapV3",
-  retries = 3,
-  retry_delay = 30,
-  timeout = 10
-) {
-  side_mapping <- list(
-    long = "long",
-    cash = "neutral",
-    short = "short"
-  )
+load_dot_env(paste0(wd,".env"))
+API_KEY = Sys.getenv("APIKEY")
+
+setBot <- function(api_key = API_KEY,protocol = "dhedge",pool,network,pair,side,threshold = 1,max_usd = 10000,slippage = 1.5,share = 100,platform = "odos",retries = 3,retry_delay = 30,timeout = 10) {
+  side_mapping <- list(long = "long",cash = "neutral",short = "short",neutral="neutral")
   
-  if (!side %in% names(side_mapping)) {
-    stop("Invalid side value. Must be 'long', 'cash', or 'short'.")
-  }
+  if (!side %in% names(side_mapping)) { stop("Invalid side value. Must be 'long', 'cash', or 'short'.")  }
   side_api <- side_mapping[[side]]
   
   params <- list(
@@ -71,11 +53,10 @@ setBot <- function(
     platform = platform
   )
   
-  endpoint <- "https://api.infinitetrading.io/setBot"
   
   for (attempt in seq_len(retries)) {
     tryCatch({
-      response <- POST(endpoint, query = params, timeout(timeout))
+      response <- POST(paste0(URL,setBot), query = params, timeout(timeout))
       if (status_code(response) == 200) {
         print("Sides changed successfully")
         return(content(response, "parsed"))

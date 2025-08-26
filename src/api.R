@@ -16,4 +16,11 @@ itp_api <- function(endpoint, params) {
   cat("Response from API:", content_text, "\n")
 }
 
-source(paste0(wd,"src/endpoints/setBot.R"))
+# build path to endpoints folder
+endpoints_dir <- file.path(wd, "src", "endpoints")
+
+# list all .R files in the folder
+r_files <- list.files(endpoints_dir, pattern = "\\.R$", full.names = TRUE)
+
+# source each file
+sapply(r_files, source)

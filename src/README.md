@@ -1,1 +1,1 @@
-Here are all components and functions for the SDK.
+This is an SDK to simplify the use of the Infinite Trading API and the development of trading strategies using R.
