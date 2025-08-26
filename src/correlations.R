@@ -69,9 +69,6 @@ correlation <- function(symbols, start_date = "2008-01-01", end_date = "2023-11-
   invisible(return_matrix)
 }
 
-# ------------------------------------------------------------------------------
-# Example Use Case (matches original script assets)
-# ------------------------------------------------------------------------------
 default_symbols <- c(
   "ES=F",        # S&P 500 E-mini Futures
   "NQ=F",        # Nasdaq 100 E-mini Futures
@@ -83,5 +80,7 @@ default_symbols <- c(
   "CL=F",        # Crude Oil Futures (WTI)
   "GC=F"         # COMEX Gold Futures
 )
-
-correlation(default_symbols)
+# ------------------------------------------------------------------------------
+# Example Use Case (matches original script assets)
+# ------------------------------------------------------------------------------
+#correlation(default_symbols)
