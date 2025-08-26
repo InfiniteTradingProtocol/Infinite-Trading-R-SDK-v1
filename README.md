@@ -60,6 +60,13 @@ source("C:/Users/YourUser/Documents/GitHub/Infinite-Trading-R-SDK-V1/main.R")
 
 ---
 
+## 📝 Strategies
+
+* There is a pre-made ETH-USD 6H EMA Crossover Strategy that you can modify and use to trade using our API. `Strategies/WETH-USDC.R`).
+* API requests require your wallet to be funded for transactions (Requires ETH on Optimism/Base/Arbitrum/Ethereum and POL on Polygon).
+
+---
+
 ## 📝 Notes
 
 * Ensure your `.env` file is not shared or committed to version control (add it to `.gitignore`).
