@@ -19,7 +19,6 @@ This SDK provides tools to simplify interaction with the **Infinite Trading API*
 
    ```bash
    git clone https://github.com/InfiniteTradingProtocol/Infinite-Trading-R-SDK-v1.git
-   cd infinite-trading-r-sdk
    ```
 
 ---
