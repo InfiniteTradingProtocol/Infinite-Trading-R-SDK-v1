@@ -23,18 +23,13 @@
 #
 # 7. Select your gas wallet, the newly linked vault, and WETH-USDC (recommended: Odos platform)
 # 
-# You are set, now you only need to run this code from the clour or your personal server/computer.
+# You are set, now you only need to run this code from the cloud server or your personal computer.
 #
 # This code will run forever on an infinite loop. You can remove the while(1) {} loop and use a cron scheduler if desired.
 #
 #--------------------------------------------------------------------------------
 
 #This strategy is live here: https://dhedge.org/vault/0xb3daeb9b47bab1e56f29a77eb7a9c7f0ff63221d
-#Loading dependencies  
-
-#Load the coinbase and ITP API adapters on the main folder
-source("~/coinbase.R")
-source("~/api.R")
 
 #Load the required packages (use install.packages() to install each of those if its the first time)
 require(jsonlite); require(lubridate); require(TTR); require(quantmod)
