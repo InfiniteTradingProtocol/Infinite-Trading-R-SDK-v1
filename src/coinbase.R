@@ -24,17 +24,24 @@ get_candles <- function(pair, numcandles, timeframe) {
       stop(sprintf("HTTP error occurred: %d - %s", status_code(response), content(response, "text")))
     }
     candles <- fromJSON(content(response, "text"), flatten = TRUE)
-    colnames(candles) = c("time","open","high","low","close","volume")
-    candles = rev(candles)
+    # Ensure candles is a data frame with 6 columns
+    if (is.null(candles) || length(candles) == 0) {
+      candles <- data.frame(time=integer(), open=numeric(), high=numeric(), low=numeric(), close=numeric(), volume=numeric())
+    } else if (is.vector(candles) || is.list(candles)) {
+      # If candles is a list of vectors, convert to data frame
+      candles <- as.data.frame(do.call(rbind, candles))
+    }
+    colnames(candles) <- c("time","open","high","low","close","volume")
+    candles <- candles[nrow(candles):1, ] # reverse order
     # Return only the last `numcandles` if available
-    if (length(candles) > numcandles) {
+    if (nrow(candles) > numcandles) {
       return(candles[1:numcandles, ])
     } else {
       return(candles)
     }
   }, error = function(e) {
     cat(sprintf("Error fetching candles: %s\n", e$message))
-    return(NULL)
+    return(data.frame(time=integer(), open=numeric(), high=numeric(), low=numeric(), close=numeric(), volume=numeric()))
   })
 }
 

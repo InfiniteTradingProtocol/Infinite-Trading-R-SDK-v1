@@ -14,7 +14,7 @@ load_dot_env(paste0(wd,".env"))
 API_KEY = Sys.getenv("APIKEY")
 
 
-require(dotenv); require(httr)
+
 #Load all dependencies.
 source(paste0(wd,"src/coinbase.R"))
 source(paste0(wd,"src/api.R"))
@@ -22,11 +22,16 @@ source(paste0(wd,"src/api.R"))
 source(paste0(wd,"src/correlations.R"))
 
 
-#Example
+#Example of cryptocurrency correlations.
 
 #Fetch 1H Candles from Coinbase and store it
 
-eth_1h_candles = get_candles_with_retry(pair="ETH-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
-btc_1h_candles = get_candles_with_retry(pair="BTC-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
-link_1h_candles = get_candles_with_retry(pair="LINK-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
-sol_1h_candles = get_candles_with_retry(pair="SOL-USD", numcandles=300, timeframe="1h", retries = 3, delay = 1) 
+eth_1h_candles = get_candles_with_retry(pair="ETH-USD", numcandles=30, timeframe="d", retries = 3, delay = 1) 
+btc_1h_candles = get_candles_with_retry(pair="BTC-USD", numcandles=30, timeframe="1d", retries = 3, delay = 1) 
+link_1h_candles = get_candles_with_retry(pair="LINK-USD", numcandles=30, timeframe="1d", retries = 3, delay = 1) 
+sol_1h_candles = get_candles_with_retry(pair="SOL-USD", numcandles=30, timeframe="1d", retries = 3, delay = 1)
+ltc_1h_candles = get_candles_with_retry(pair="LTC-USD", numcandles=30, timeframe="1d", retries = 3, delay = 1)
+
+returns_matrix = cbind(returns(eth_1h_candles), returns(btc_1h_candles), returns(link_1h_candles), returns(sol_1h_candles), returns(ltc_1h_candles))
+colnames(returns_matrix) = c("ETH", "BTC", "LINK", "SOL","LTC")
+chart.Correlation(returns_matrix)

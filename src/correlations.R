@@ -80,7 +80,5 @@ default_symbols <- c(
   "CL=F",        # Crude Oil Futures (WTI)
   "GC=F"         # COMEX Gold Futures
 )
-# ------------------------------------------------------------------------------
-# Example Use Case (matches original script assets)
-# ------------------------------------------------------------------------------
+#Example
 #correlation(default_symbols)
