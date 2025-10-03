@@ -61,8 +61,8 @@ while (1) {
   print(candles)
   EMA_FAST = EMA(Cl(candles),n=n_fast); EMA_SLOW = EMA(Cl(candles),n=n_slow)
 
-  CROSSOVERS = sign(EMA_FAST - EMA_SLOW)
-  side = ifelse(last(CROSSOVERS),"long","neutral")
+  CROSSOVERS = EMA_FAST - EMA_SLOW
+  side = ifelse(last(CROSSOVERS) > 0,"long","neutral")
   if (side != last_side) { 
       last_side = side
       itp_api(endpoint="setBot",params=list(apiKey=apiKey,protocol=protocol,network=network,pool=pool,pair=pair,side=side,max_usd=max_usd,slippage=slippage,threshold=threshold,share=share,platform=platform))  }
